@@ -1,5 +1,5 @@
 import articles from "./articles-content";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import useUser from "../hooks/useUser";
 const ArticlePage = () => {
   const { articleID } = useParams();
   const [user, isLoading] = useUser();
+  const navigate = useNavigate();
 
   const [articleInfo, setArticleInfo] = useState({
     articleName: "learn-react",
@@ -56,6 +57,22 @@ const ArticlePage = () => {
     }
   };
 
+  const removeUpvote = async () => {
+    const authtoken = user && (await user.getIdToken());
+    const headers = authtoken ? { authtoken } : {};
+
+    const response = await axios.put(
+      `/api/articles/${articleID}/removeUpvotes`,
+      null,
+      { headers }
+    );
+
+    const theData = response.data;
+    if (theData) {
+      setArticleInfo(theData);
+    }
+  };
+
   if (!theArticle) {
     return <NotFoundPage />;
   }
@@ -72,12 +89,19 @@ const ArticlePage = () => {
             <AiFillLike />
           </button>
         ) : (
-          <button type="button">
+          <button type="button" onClick={removeUpvote}>
             <AiFillDislike />
           </button>
         )
       ) : (
-        <button type="button">Log in to like</button>
+        <button
+          type="button"
+          onClick={() => {
+            navigate("/login");
+          }}
+        >
+          Log in to like
+        </button>
       )}
       <h3>This article has {articleInfo.upvote} upvote(s)</h3>
 

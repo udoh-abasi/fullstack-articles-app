@@ -87,6 +87,39 @@ app.put(`/api/articles/:name/upvotes`, async (req, res) => {
   }
 });
 
+app.put(`/api/articles/:name/removeUpvotes`, async (req, res) => {
+  const { name } = req.params;
+  const { uid } = req.user;
+
+  const theArticle = await db
+    .collection("articles")
+    .findOne({ articleName: name });
+
+  const canNotUpvote = theArticle.allUpvoteIDs.includes(uid);
+  console.log(canNotUpvote);
+
+  if (canNotUpvote) {
+    await db.collection("articles").updateOne(
+      { articleName: name },
+      {
+        $pullAll: { allUpvoteIDs: [uid] },
+        $inc: { upvote: -1 },
+      }
+    );
+
+    const updatedArticle = await db
+      .collection("articles")
+      .findOne({ articleName: name });
+    if (updatedArticle) {
+      console.log(updatedArticle);
+      updatedArticle.canUpvote = true;
+      res.json(updatedArticle);
+    } else {
+      res.sendStatus(403);
+    }
+  }
+});
+
 app.post(`/api/articles/:name/comments`, async (req, res) => {
   const { name } = req.params;
   const { text } = req.body;
