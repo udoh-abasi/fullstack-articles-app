@@ -123,7 +123,7 @@ app.put(`/api/articles/:name/removeUpvotes`, async (req, res) => {
 app.post(`/api/articles/:name/comments`, async (req, res) => {
   const { name } = req.params;
   const { text } = req.body;
-  const { email } = req.user;
+  const { email, uid } = req.user;
 
   const theArticle = await db
     .collection("articles")
@@ -141,6 +141,9 @@ app.post(`/api/articles/:name/comments`, async (req, res) => {
     const updatedArticle = await db
       .collection("articles")
       .findOne({ articleName: name });
+
+    const allUpvoteIDs = updatedArticle.allUpvoteIDs || [];
+    updatedArticle.canUpvote = !allUpvoteIDs.includes(uid);
 
     res.json(updatedArticle);
   } else {
