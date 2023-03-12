@@ -24,12 +24,28 @@ const CommentForm = ({ onsendArticlesInfo, articleID }) => {
     }
   };
 
+  const commentPostedBy = () => {
+    let commentPostedBy = user.email;
+    const indexOfDot = commentPostedBy.indexOf(".");
+    const indexOfAt = commentPostedBy.indexOf("@");
+
+    if (indexOfDot < indexOfAt) {
+      commentPostedBy = commentPostedBy.slice(0, indexOfDot);
+    } else {
+      commentPostedBy = commentPostedBy.slice(0, indexOfAt);
+    }
+
+    commentPostedBy =
+      commentPostedBy.charAt(0).toUpperCase() + commentPostedBy.slice(1);
+    return commentPostedBy;
+  };
+
   return (
     <div id="add-comment-form">
       {user ? (
         <>
           <h3>Add a Comment</h3>
-          <p> You are posting as {user.email} </p>
+          <p> You are posting as {user && commentPostedBy()} </p>
           <textarea
             rows="4"
             cols="50"
