@@ -109,7 +109,11 @@ const ArticlePage = () => {
         <p key={index}>{eachContent}</p>
       ))}
 
-      <AddComment comments={articleInfo.comment} />
+      <AddComment
+        comments={articleInfo.comment}
+        onSendSetArticleInfo={(theData) => setArticleInfo(theData)}
+        articleID={articleID}
+      />
       <CommentForm
         onsendArticlesInfo={(theData) => setArticleInfo(theData)}
         articleID={articleID}

@@ -151,6 +151,30 @@ app.post(`/api/articles/:name/comments`, async (req, res) => {
   }
 });
 
+app.post(`/api/articles/:name/deleteComment`, async (req, res) => {
+  const { name } = req.params;
+  const { text } = req.body;
+  const { email, uid } = req.user;
+
+  await db.collection("articles").updateOne(
+    { articleName: name },
+    {
+      $pull: { comment: { postedBy: email, text } },
+    }
+  );
+
+  const theArticle = await db
+    .collection("articles")
+    .findOne({ articleName: name });
+
+  if (theArticle) {
+    const allUpvoteIDs = theArticle.allUpvoteIDs || [];
+    theArticle.canUpvote = !allUpvoteIDs.includes(uid);
+
+    res.json(theArticle);
+  }
+});
+
 connectToDb(() => {
   app.listen("8000", () => {
     console.log("Server is listening on port 8000");
