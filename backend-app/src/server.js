@@ -1,7 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import { db, connectToDb } from "./db.js";
 import admin from "firebase-admin";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const mycredential = JSON.parse(fs.readFileSync("./fullstack-auth.json"));
 
@@ -11,7 +14,16 @@ admin.initializeApp({
 
 const app = express();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(express.json());
+
+app.use(express.static(path.join(__dirname, "../build")));
+
+app.get(/^(?!\/api).+/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../build/index.html"));
+});
 
 app.use(async (req, res, next) => {
   const { authtoken } = req.headers;
@@ -175,8 +187,10 @@ app.post(`/api/articles/:name/deleteComment`, async (req, res) => {
   }
 });
 
+const PORT = process.env.PORT || 8000;
+
 connectToDb(() => {
-  app.listen("8000", () => {
-    console.log("Server is listening on port 8000");
+  app.listen(PORT, () => {
+    console.log("Server is listening on port", PORT);
   });
 });
